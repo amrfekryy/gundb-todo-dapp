@@ -1,0 +1,77 @@
+<!-- multi-user public todo app -->
+
+<!DOCTYPE html>
+<html>
+  <body>
+
+    <h1>Todo</h1>
+    
+    <!-- sign-in/sign-up form -->
+    <form id="sign">
+      <input id="alias" placeholder="username">
+      <input id="pass" type="password" placeholder="passphrase">
+      <input id="in" type="submit" value="sign in">
+      <input id="up" type="button" value="sign up">
+    </form>
+
+    <ul></ul>
+    
+    <!-- add item form -->
+    <form id="said">
+        <input id="say">
+        <input id="speak" type="submit" value="speak">
+    </form>
+
+    <!-- Add CDNs: dependencies are prefered to be included locally with the app for pretection and to work offline first -->
+    <!-- jQuery: can use React/Vue instead -->
+    <script src="https://cdn.jsdelivr.net/npm/gun/examples/jquery.js"></script> 
+    <!-- GUN: main database dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <!-- SEA: cryptographic security library for GUN -->
+    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+    <!-- WebRTC: enables P2P connections to other browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/webrtc.js"></script>
+    <!-- App's own JS -->
+    <script>
+
+        // initialize GUN and connect to other peers (local peer and public peer)
+        var gun = Gun(['http://localhost:8765/gun', 'https://gunjs.herokuapp.com/gun']);
+        
+        // handle user registration and login
+        var user = gun.user();
+
+        $('#up').on('click', function(e){
+            user.create($('#alias').val(), $('#pass').val());
+        });
+
+        $('#sign').on('submit', function(e){
+            e.preventDefault();
+            user.auth($('#alias').val(), $('#pass').val());
+        });
+
+        // handle item submission
+        $('#said').on('submit', function(e){
+            e.preventDefault();
+            // check user is logged in
+            if(!user.is){ return }
+            // add item to a table inside the 'said' document on the user graph
+            user.get('said').set($('#say').val());
+            $('#say').val("");
+        });
+
+        // a function to display items on UI
+        function UI(say, id){
+            var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul');
+            $(li).text(say);
+        };
+
+        // handle login event
+        gun.on('auth', function(){
+            $('#sign').hide();
+            user.get('said').map().once(UI);
+        });
+
+    </script>
+
+</body>
+</html>
