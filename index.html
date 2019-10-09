@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Todo App</title>
+  <style>
+    ul { padding: 0; }
+    li { display: flex; }
+    li span { width: 150px; word-break: break-all; }
+    img { height: 20px; margin-left: 8px; cursor: pointer; }
+    input[type='text'] { width: 150px; margin-right: 8px; }
+    input[type='checkbox'] { width: auto; }
+  </style>
+</head>
+<body>
+
+  <h3>Welcome to TODO app, sign in/up to continue</h3>
+  
+  <!-- sign in/up form -->
+  <form id="sign">
+    <input id="alias" placeholder="username">
+    <input id="pass" type="password" placeholder="passphrase">
+    <input id="in" type="submit" value="sign in">
+    <input id="up" type="button" value="sign up">
+  </form>
+
+  <ul></ul>
+  
+  <!-- add todo form -->
+  <form id="todo-form" style="display: none">
+    <input id="todo-input">
+    <input type="submit" value="Add">
+  </form>
+
+
+  <!-- Add CDNs: dependencies are prefered to be included locally with the app for pretection and to work offline first -->
+  <!-- jQuery: can use React/Vue instead -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/examples/jquery.js"></script> 
+  <!-- GUN: main database dependency -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <!-- SEA: cryptographic security library for GUN -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+  <!-- WebRTC: enables P2P connections to other browsers -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/lib/webrtc.js"></script>
+  <!-- App's own JS -->
+  <script>
+
+    // initialize GUN and connect to other peers (local peer and public peer)
+    var gun = Gun(['http://localhost:8765/gun', 'https://gunjs.herokuapp.com/gun']);
+
+    // initialize 'user' variable to be used to create, authenticate, access user data.
+    var user = gun.user();
+    
+    // handle user registration and login
+    $('#up').on('click', function(e){
+      // user.create(username, password)
+      user.create($('#alias').val(), $('#pass').val());
+    });
+    $('#sign').on('submit', function(e){
+      e.preventDefault();
+      // user.auth(username, password)
+      user.auth($('#alias').val(), $('#pass').val());
+    });
+
+    // ------ Save a todo to DB on form submit
+    $('#todo-form').on('submit', function(e){
+      // check user is logged in
+      if(!user.is){ return }
+      // get Todo input
+      var input = $('#todo-input')
+      // add item to a table inside the 'said' document on the user graph
+      user.get('todos').set({text: input.val()})
+      // clear input
+      input.val('')
+      // stop page relaod
+      e.preventDefault()
+    });
+
+    // ------ Show Todos and listen for DB changes (add/edit/delete)
+    function UI(todo, id) { // function is called 'ForEach' (todo, id) in DB
+      // check if there is already a 'li' with that id on page
+      var li = $(`li[id="${id}"]`);
+      // if it doesn't exist, appen a new 'li' with that id to 'ul'
+      if (!li.get(0)) {
+        li = $('<li>').attr('id', id).appendTo('ul');
+      }
+
+      if (todo) {
+        // create a clickable span for editting text
+        var html = '<span onclick="clickText(this)">' + todo.text + '</span>'
+        // prepend a checkbox for setting the state
+        html = '<input type="checkbox" onclick="clickCheck(this)" ' + (todo.done ? 'checked' : '') + '>' + html
+        // append clickable img for deletion
+        html += '<img onclick="clickDelete(this)" src="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/svgs/fi-x.svg"/>'
+        // add html to 'li'
+        li.html(html)
+      } else {
+          // remove 'li' from page
+          li.remove()
+        }
+    }
+
+    // ------ Enable Todo edit on Todo click
+    function clickText (element) { // element = <span>
+      // get the Todo <span> clicked
+      element = $(element)
+      // turn text into input for text edit, if not already an input (already clicked)
+      if (!element.find('input').get(0)) {
+        element.html('<input value="' + element.html() + '" onkeyup="keypressText(this)">')
+      }
+    }
+    // ------ Save Todo edit on 'Enter' release
+    function keypressText (element) { // element = <input>
+      // check if key released in 'Enter'
+      if (event.keyCode === 13) {
+        // in 'todos' where 'id' update 'title' to input value
+        // todos.get(id).put({title:text})
+        user.get('todos').get($(element).parent().parent().attr('id')).put({text: $(element).val()})
+      }
+    }
+
+    // ------ Enable Todo done state
+    function clickCheck (element) { // element = checkbox input
+      // in 'todos' where 'id' create/update 'done' to input checked value
+      // todos.get(id).put({done:true/false})
+      user.get('todos').get($(element).parent().attr('id')).put({done: $(element).prop('checked')})
+    }
+
+    // ------ Enable Todo deletion
+    function clickDelete (element) { // element = delete img
+      // in 'todos' where 'id' set 'null' (deletion in Gun db)
+      // todos.get(id).put({done:true/false})
+      user.get('todos').get($(element).parent().attr('id')).put(null)
+    }
+
+    // handle login event
+    gun.on('auth', function(){
+      $('#sign').hide();
+      $('#todo-form').show();
+      user.get('todos').map().on(UI);
+    });
+
+  </script>
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Todo App</title>
+    <title>Todo App with CRUD functionality</title>
     <style>
         ul { padding: 0; }
         li { display: flex; }
@@ -43,6 +43,7 @@
 
     // ------ Show Todos and listen for DB changes (add/edit/delete)
     todos.map().on(function (todo, id) { // function is called 'ForEach' (todo, id) in DB
+      
       // check if there is already a 'li' with that id on page
       var li = $('#' + id)
       // if it doesn't exist, appen a new 'li' with that id to 'ul'
