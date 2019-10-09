@@ -5,35 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Todo App</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <style>
-    ul { padding: 0; }
-    li { display: flex; }
-    li span { width: 150px; word-break: break-all; }
-    img { height: 20px; margin-left: 8px; cursor: pointer; }
-    input[type='text'] { width: 150px; margin-right: 8px; }
-    input[type='checkbox'] { width: auto; }
+    ul { padding: 0;}
+    li { display: flex;}
+    .alert { width: 250px }
+    li span { width: 150px; word-break: break-all; margin: 0px 10px 5px}
+    img { height: 15px; margin-left: 8px; cursor: pointer; }
+    input[type='text'] { width: 150px; margin-right: 10px; }
+    input[type='checkbox'] { width: auto; margin: 10px 10px 0 0}
   </style>
 </head>
-<body>
+<body>            
 
-  <h3>Welcome to TODO app, sign in/up to continue</h3>
+  <div class="container">        
+
+    <div class="row justify-content-center m-5">
+      <div id="sign-card" class="card" style="width: 18rem; text-align: center">
+        <div class="card-body">
+          <h5 class="card-title">Welcome to my TODO app</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Sign in/up to continue</h6>
+            <!-- sign in/up form -->
+            <form id="sign" class="mt-3">
+              <div>
+                <input id="alias" class="form-control mb-2" placeholder="username">
+                <input id="pass" class="form-control" type="password" placeholder="passphrase">
+              </div>
+              <div class="mt-3">
+                <input id="in" class="btn btn-warning" type="submit" value="sign in">
+                <input id="up" class="btn btn-danger" type="button" value="sign up">
+              </div>
+            </form>  
+        </div>
+      </div>
+    </div>    
+    
+    <div class="row justify-content-center m-5">
+        <ul></ul>
+        <div class="w-100"></div>
+        <!-- add todo form -->
+        <form id="todo-form" class="form-inline" style="display: none">
+          <input id="todo-input" class="form-control">
+          <input class="btn btn-primary ml-2" type="submit" value="Add">
+        </form>
+    </div>
   
-  <!-- sign in/up form -->
-  <form id="sign">
-    <input id="alias" placeholder="username">
-    <input id="pass" type="password" placeholder="passphrase">
-    <input id="in" type="submit" value="sign in">
-    <input id="up" type="button" value="sign up">
-  </form>
-
-  <ul></ul>
   
-  <!-- add todo form -->
-  <form id="todo-form" style="display: none">
-    <input id="todo-input">
-    <input type="submit" value="Add">
-  </form>
-
+  </div>
 
   <!-- Add CDNs: dependencies are prefered to be included locally with the app for pretection and to work offline first -->
   <!-- jQuery: can use React/Vue instead -->
@@ -82,9 +101,9 @@
     function UI(todo, id) { // function is called 'ForEach' (todo, id) in DB
       // check if there is already a 'li' with that id on page
       var li = $(`li[id="${id}"]`);
-      // if it doesn't exist, appen a new 'li' with that id to 'ul'
+      // if it doesn't exist, append a new 'li' with that id to 'ul'
       if (!li.get(0)) {
-        li = $('<li>').attr('id', id).appendTo('ul');
+        li = $('<li>').attr('id', id).attr('class', "alert alert-success").appendTo('ul');
       }
 
       if (todo) {
@@ -137,7 +156,7 @@
 
     // handle login event
     gun.on('auth', function(){
-      $('#sign').hide();
+      $('#sign-card').hide();
       $('#todo-form').show();
       user.get('todos').map().on(UI);
     });
