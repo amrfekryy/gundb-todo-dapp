@@ -9,27 +9,26 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <style>
     ul { padding: 0;}
-    li { display: flex;}
-    .alert { width: 250px }
-    li span { width: 150px; word-break: break-all; margin: 0px 10px 5px}
-    img { height: 15px; margin-left: 8px; cursor: pointer; }
-    input[type='text'] { width: 150px; margin-right: 10px; }
-    input[type='checkbox'] { width: auto; margin: 10px 10px 0 0}
+    li { display: inline-block; margin: 5px; width: 250px;}
+    input[type='checkbox'] { width: auto;}
+    img { height: 15px; float: right; cursor: pointer; }
+    li span { display: block; word-break: break-all;}
+    li span input { width: 200px }
   </style>
 </head>
 <body>            
 
   <div class="container">        
 
-    <div class="row justify-content-center m-5">
-      <div id="sign-card" class="card" style="width: 18rem; text-align: center">
+    <div id="sign-page" class="row justify-content-center m-5">
+      <div class="card" style="width: 18rem; text-align: center">
         <div class="card-body">
           <h5 class="card-title">Welcome to my TODO app</h5>
           <h6 class="card-subtitle mb-2 text-muted">Sign in/up to continue</h6>
             <!-- sign in/up form -->
             <form id="sign" class="mt-3">
               <div>
-                <input id="alias" class="form-control mb-2" placeholder="username">
+                <input id="alias" class="form-control mb-2" placeholder="username" autofocus>
                 <input id="pass" class="form-control" type="password" placeholder="passphrase">
               </div>
               <div class="mt-3">
@@ -39,18 +38,21 @@
             </form>  
         </div>
       </div>
-    </div>    
-    
-    <div class="row justify-content-center m-5">
-        <ul></ul>
-        <div class="w-100"></div>
+    </div>          
+
+    <div id="todo-page" style="display: none">
         <!-- add todo form -->
-        <form id="todo-form" class="form-inline" style="display: none">
-          <input id="todo-input" class="form-control">
-          <input class="btn btn-primary ml-2" type="submit" value="Add">
-        </form>
+        <div class="row justify-content-center m-3">
+          <form id="todo-form" class="input-group">
+            <input id="todo-input" class="form-control" placeholder="Write something todo here">
+            <div class="input-group-append">
+              <input class="btn btn-primary ml-2" type="submit" value="Add">
+            </div>
+          </form>
+        </div>
+        <ul class="row justify-content-center">
+        </ul>
     </div>
-  
   
   </div>
 
@@ -107,12 +109,13 @@
       }
 
       if (todo) {
-        // create a clickable span for editting text
-        var html = '<span onclick="clickText(this)">' + todo.text + '</span>'
-        // prepend a checkbox for setting the state
-        html = '<input type="checkbox" onclick="clickCheck(this)" ' + (todo.done ? 'checked' : '') + '>' + html
+        var html = ''
+        // append a checkbox for setting the state
+        html = '<input type="checkbox" onclick="clickCheck(this)" ' + (todo.done ? 'checked' : '') + '>'
         // append clickable img for deletion
         html += '<img onclick="clickDelete(this)" src="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/svgs/fi-x.svg"/>'
+        // create a clickable span for editting text
+        html += '<span onclick="clickText(this)">' + todo.text + '</span>'
         // add html to 'li'
         li.html(html)
       } else {
@@ -156,15 +159,12 @@
 
     // handle login event
     gun.on('auth', function(){
-      $('#sign-card').hide();
-      $('#todo-form').show();
+      $('#sign-page').hide();
+      $('#todo-page').show();
       user.get('todos').map().on(UI);
     });
 
   </script>
-
-
-
 
 </body>
 </html>
